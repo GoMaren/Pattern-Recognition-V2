@@ -71,6 +71,60 @@ int main()
 	namedWindow("Original image", WINDOW_AUTOSIZE);
 	imshow("Original image", image);
 
+	int height = image.size().height;
+	int width = image.size().width;
+
+	Mat chanels[3];
+	split(image, chanels);
+
+	// Old-school c-style arrays
+	int*** colors = new int** [height];
+	for (int i = 0; i < height; ++i)
+	{
+		colors[i] = new int* [width];
+		for (int j = 0; j < width; ++j)
+		{
+			colors[i][j] = new int[3];
+			for (int c = 0; c < 3; ++c)
+				colors[i][j][c] = int(chanels[c].at<uchar>(i, j));
+		}
+	}
+
+	// Target colors
+	const int modKs = 2;
+	int Ks[modKs][3] = { {0, 255, 0}, {255, 0, 0} };
+	//int Ks[modKs][3] = { {255, 255, 255}, {0, 0, 0} };
+
+	// Sqr color diffs
+	int*** cDiff = new int** [height];
+	for (int i = 0; i < height; ++i)
+	{
+		cDiff[i] = new int* [width];
+		for (int j = 0; j < width; ++j)
+		{
+			cDiff[i][j] = new int[3];
+			for (int k = 0; k < modKs; ++k)
+				cDiff[i][j][k] = SqrColorDiff(colors[i][j], Ks[k]);
+		}
+	}
+
+	// Initialize phi
+	const int modNei = 4;
+	int modT = height * width;
+	float*** phi = new float** [modT];
+	for (int ij = 0; ij < modT; ++ij)
+	{
+		phi[ij] = new float* [modNei];
+		for (int ind = 0; ind < modNei; ++ind)
+		{
+			phi[ij][ind] = new float[modKs]();
+			for (int k = 0; k < modKs; ++k)
+			{
+				phi[ij][ind][k] = 0.;
+			}
+		}
+	}
+
 	waitKey(0);
 	return 0;
 }
