@@ -1,0 +1,3 @@
+cmake_minimum_required(VERSION 3.10)
+project(Tests)
+add_executable(tests_lab_2.cpp)
