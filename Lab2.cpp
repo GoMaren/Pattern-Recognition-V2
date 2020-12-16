@@ -125,6 +125,50 @@ int main()
 		}
 	}
 
+	auto start = high_resolution_clock::now();
+	// Main loop
+	const int loops = 30;
+	float alpha = 1.25;
+	float g[2][2] = { {0, -alpha}, {-alpha, 0} };
+	for (int iter = 0; iter < loops; ++iter)
+	{
+		for (int ij = 0; ij < modT; ++ij)
+			for (int k = 0; k < modKs; ++k)
+			{
+				// Getting indices
+				int Nt = 0;
+				int* neighbors = GetNeighborsPlus(ij / width, ij % width, height, width, &Nt);
+				int kStar[4];
+				for (int ind = 0; ind < modNei; ++ind)
+					if (neighbors[ind] != -1)
+					{
+						// Calculating k*
+						float masK[2] = { 0., 0. };
+						for (int k_ = 0; k_ < modKs; ++k_)
+							masK[k_] = g[k][k_] - phi[ij][ind][k] - phi[neighbors[ind]][(ind + 2) % modNei][k_];
+						kStar[ind] = int(masK[1] > masK[0]);
+					}
+
+				// Calculating C(t)
+				float Ct = 0.;
+				for (int ind = 0; ind < modNei; ++ind)
+					if (neighbors[ind] != -1)
+						Ct += g[k][kStar[ind]] - phi[neighbors[ind]][(ind + 2) % modNei][kStar[ind]];
+
+				Ct += -int(cDiff[ij / width][ij % width][k] > cDiff[ij / width][ij % width][1 - k]);
+				Ct /= Nt;
+
+				for (int ind = 0; ind < modNei; ++ind)
+					if (neighbors[ind] != -1)
+						phi[ij][ind][k] = g[k][kStar[ind]] - phi[neighbors[ind]][(ind + 2) % modNei][kStar[ind]] - Ct;
+
+				delete[] neighbors;
+			}
+	}
+	auto stop = high_resolution_clock::now();
+	auto duration = duration_cast<microseconds>(stop - start);
+	cout << "Time used for " << loops << " iterations : " << float(duration.count()) / 1000000. << endl;
+
 	waitKey(0);
 	return 0;
 }
