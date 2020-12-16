@@ -3,13 +3,13 @@
 #include "opencv2/imgproc/imgproc.hpp"
 #include <iostream>
 #include <vector>
-#include <chrono> 
+//#include <chrono> 
 #include <cmath>
 #include <cassert>
 
 using namespace cv;
 using namespace std;
-using namespace std::chrono;
+//using namespace std::chrono;
 
 int* GetNeighborsPlus(int i, int j, int h, int w, int* Nt)
 {
@@ -125,7 +125,7 @@ int main()
 		}
 	}
 
-	auto start = high_resolution_clock::now();
+	//auto start = high_resolution_clock::now();
 	// Main loop
 	const int loops = 30;
 	float alpha = 1.25;
@@ -165,9 +165,9 @@ int main()
 				delete[] neighbors;
 			}
 	}
-	auto stop = high_resolution_clock::now();
-	auto duration = duration_cast<microseconds>(stop - start);
-	cout << "Time used for " << loops << " iterations : " << float(duration.count()) / 1000000. << endl;
+	//auto stop = high_resolution_clock::now();
+	//auto duration = duration_cast<microseconds>(stop - start);
+	//cout << "Time used for " << loops << " iterations : " << float(duration.count()) / 1000000. << endl;
 
 	// Best Ks
 	int* raw = new int[modT];
