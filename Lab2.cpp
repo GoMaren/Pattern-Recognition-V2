@@ -169,6 +169,67 @@ int main()
 	auto duration = duration_cast<microseconds>(stop - start);
 	cout << "Time used for " << loops << " iterations : " << float(duration.count()) / 1000000. << endl;
 
+	// Best Ks
+	int* raw = new int[modT];
+	for (int ij = 0; ij < modT; ++ij)
+	{
+		// Getting indices
+		int Nt = 0;
+		int* neighbors = GetNeighborsPlus(ij / width, ij % width, height, width, &Nt);
+		int ind = 0;
+		while (neighbors[ind] == -1)
+			ind++;
+		int ind_ = (ind + 2) % modNei;
+		int ij_ = neighbors[ind];
+
+		// Test neighbors
+		int Nt_ = 0;
+		int* neighbors_ = GetNeighborsPlus(ij_ / width, ij_ % width, height, width, &Nt_);
+		assert(neighbors_[ind_] == ij);
+		delete[] neighbors_;
+
+		float* kMax = new float[modKs]();
+
+		for (int k = 0; k < modKs; ++k)
+		{
+			// Calculating kMax
+			float* masK = new float[modKs]();
+
+			for (int k_ = 0; k_ < modKs; ++k_)
+				masK[k_] = g[k][k_] - phi[ij][ind][k] - phi[ij_][ind_][k_];
+
+			kMax[k] = (masK[1] > masK[0]) ? masK[1] : masK[0];
+
+			delete[] masK;
+		}
+
+		raw[ij] = int(kMax[1] > kMax[0]);
+
+		delete[] neighbors;
+		delete[] kMax;
+	}
+
+	Mat channel[3];
+	for (int c = 0; c < 3; ++c)
+	{
+		channel[c] = Mat::zeros(Size(width, height), CV_8UC1);
+		for (int i = 0; i < height; ++i)
+			for (int j = 0; j < width; ++j)
+				channel[c].at<uchar>(i, j) = (raw[i * width + j] == 0) ? uchar(Ks[0][c]) : uchar(Ks[1][c]);
+	}
+
+	vector<Mat> channels;
+	for (int i = 0; i < 3; ++i)
+		channels.push_back(channel[i]);
+
+	Mat result;
+	merge(channels, result);
+
+	namedWindow("Result image", WINDOW_AUTOSIZE);
+	imshow("Result image", result);
+
+	imwrite("res1.png", result);
+
 	waitKey(0);
 	return 0;
 }
