@@ -13,5 +13,6 @@ before_script:
     - sudo apt-get install libopencv-dev
     # Glog through apt-get does not work ...
     - cmake
+    - ls
  
 script: make 
