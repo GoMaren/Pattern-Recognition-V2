@@ -4,4 +4,3 @@ language: cpp
 
 script:
   - cmake .
-  - cmake -- build . -- -j1
